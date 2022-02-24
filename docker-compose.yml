@@ -1,0 +1,54 @@
+networks:
+ canal:
+  external:
+    name: canal
+ mysql:
+  external:
+    name: mysql
+
+services:
+  canal-server:
+   image: canal/canal-server
+   deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: "256M"
+   restart: always
+   ports:
+     - 2222:2222
+     - 8000:8000
+     - 11111:11111
+     - 11112:11112
+   networks:
+    - canal
+    - mysql
+   environment:
+    - canal.auto.scan=false
+    - canal.destinations=test
+    - canal.instance.master.address=mysql:3306
+    - canal.instance.dbUsername=root
+    - canal.instance.dbPassword=123456
+    - canal.instance.connectionCharset=UTF-8
+    - canal.instance.tsdb.enable=true
+    - canal.instance.gtidon=false 
+  canal-admin:
+   image: canal/canal-admin
+   deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: "256M"
+   restart: always
+   ports:
+     - 8089:8089
+   networks:
+    - canal
+    - mysql
+   environment:
+    - spring.datasource.address=mysql:3306
+    - spring.datasource.database=canal
+    - spring.datasource.username=root 
+    - spring.datasource.password=123456
